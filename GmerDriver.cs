@@ -33,7 +33,7 @@ namespace GmerSdk
             if (!ServiceHelper.DeleteService(ServiceName))
                 throw new FileLoadException("Can't remove Gmer service!");
             if (!ServiceHelper.CreateService(ServiceName, _driverFile))
-                if (!ServiceHelper.DeleteService(ServiceName) || ServiceHelper.CreateService(ServiceName, _driverFile))
+                if (!ServiceHelper.DeleteService(ServiceName) || !ServiceHelper.CreateService(ServiceName, _driverFile))
                     throw new FileLoadException("Can't create Gmer service!");
 
             try
