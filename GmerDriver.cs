@@ -1,8 +1,8 @@
 ﻿using System;
 using System.IO;
-using System.IO.Compression;
 using System.Reflection;
 using System.ServiceProcess;
+using System.Threading;
 
 namespace GmerSdk
 {
@@ -20,8 +20,7 @@ namespace GmerSdk
                 var resourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("GmerSdk.gmerdrv");
                 if (resourceStream == null) throw new FileLoadException("Can't find Gmer driver!");
                 using (resourceStream)
-                using (var compressionStream = new GZipStream(resourceStream, CompressionMode.Decompress))
-                    compressionStream.CopyTo(driverStream);
+                    resourceStream.CopyTo(driverStream);
 
                 _driverFile = Path.GetTempFileName();
                 File.WriteAllBytes(_driverFile, driverStream.ToArray());
@@ -33,8 +32,11 @@ namespace GmerSdk
             if (!ServiceHelper.DeleteService(ServiceName))
                 throw new FileLoadException("Can't remove Gmer service!");
             if (!ServiceHelper.CreateService(ServiceName, _driverFile))
+            {
+                Thread.Sleep(500);
                 if (!ServiceHelper.DeleteService(ServiceName) || !ServiceHelper.CreateService(ServiceName, _driverFile))
                     throw new FileLoadException("Can't create Gmer service!");
+            }
 
             try
             {
